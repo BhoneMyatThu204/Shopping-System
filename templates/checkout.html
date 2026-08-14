@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout</title>
+    <!-- Bootstrap 5 CSS via CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .bg-dark-nav {
+            background-color: #111111;
+        }
+
+        .payment-options label {
+            flex-grow: 1;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-dark bg-dark-nav mb-5 py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">UrbanTech</a>
+        </div>
+    </nav>
+
+    <!-- Checkout Form -->
+    <div class="container d-flex justify-content-center mb-5">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-sm border-0 p-4" style="border-radius: 1rem;">
+                <h3 class="mb-4 text-center fw-bold">Secure Checkout 🔒</h3>
+
+                <!-- THE UPDATED LINE IS RIGHT HERE -->
+                <form action="/pay/{{ product_id }}" method="POST">
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="John Doe">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="address" class="form-label fw-bold">Shipping Address</label>
+                        <input type="text" class="form-control" id="address" name="address" required
+                            placeholder="123 Developer Lane">
+                    </div>
+
+                    <hr class="mb-4 text-muted">
+
+                    <!-- Interactive Payment Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Payment Method</label>
+                        <div class="d-flex flex-wrap gap-2 payment-options">
+
+                            <!-- KBZ Pay -->
+                            <input type="radio" class="btn-check" name="payment_method" id="kbz" value="kbz"
+                                onchange="updatePaymentInput()" checked>
+                            <label class="btn btn-outline-primary" for="kbz">KBZ Pay</label>
+
+                            <!-- Wave Money -->
+                            <input type="radio" class="btn-check" name="payment_method" id="wave" value="wave"
+                                onchange="updatePaymentInput()">
+                            <label class="btn btn-outline-primary" for="wave">Wave Money</label>
+
+                            <!-- Ayeya Pay -->
+                            <input type="radio" class="btn-check" name="payment_method" id="ayeya" value="ayeya"
+                                onchange="updatePaymentInput()">
+                            <label class="btn btn-outline-primary" for="ayeya">Ayeya Pay</label>
+
+                            <!-- A+ Pay -->
+                            <input type="radio" class="btn-check" name="payment_method" id="aplus" value="aplus"
+                                onchange="updatePaymentInput()">
+                            <label class="btn btn-outline-primary" for="aplus">A+ Pay</label>
+
+                            <!-- Other / Credit Card -->
+                            <input type="radio" class="btn-check" name="payment_method" id="other" value="other"
+                                onchange="updatePaymentInput()">
+                            <label class="btn btn-outline-dark" for="other">Other Payment</label>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Input Field -->
+                    <div class="mb-4">
+                        <label id="account-label" for="account_info" class="form-label fw-bold">KBZ Pay Phone
+                            Number</label>
+                        <input type="text" class="form-control" id="account_info" name="account_info" required
+                            placeholder="09 XXXXXXXX" maxlength="15">
+                        <div id="account-help" class="form-text text-muted">Enter the phone number registered to your
+                            mobile wallet.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 fw-bold py-2 mb-3"
+                        style="border-radius: 10px;">Complete Payment</button>
+                    <div class="text-center">
+                        <a href="/" class="text-decoration-none text-muted">Cancel and return to shop</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to toggle the input field dynamically -->
+    <script>
+        function updatePaymentInput() {
+            // Get the currently selected radio button
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+            // Get the HTML elements we want to change
+            const inputLabel = document.getElementById('account-label');
+            const inputField = document.getElementById('account_info');
+            const helpText = document.getElementById('account-help');
+
+            if (selectedMethod === 'other') {
+                // Change UI for Credit Card
+                inputLabel.innerText = "Credit Card Number";
+                inputField.placeholder = "XXXX XXXX XXXX XXXX";
+                inputField.maxLength = 19;
+                helpText.innerText = "Use 4242 4242 4242 4242 to test a successful payment.";
+            } else {
+                // Change UI for Mobile Wallets
+                let methodName = document.querySelector(`label[for="${selectedMethod}"]`).innerText;
+                inputLabel.innerText = methodName + " Phone Number";
+                inputField.placeholder = "09 XXXXXXXX";
+                inputField.maxLength = 15;
+                helpText.innerText = "Enter the phone number registered to your mobile wallet.";
+            }
+        }
+    </script>
+</body>
+
+</html>
