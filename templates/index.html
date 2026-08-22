@@ -1,3 +1,529 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic | Fashion Store</title>
+
+    <style>
+        /* CSS Variables & Reset */
+        :root {
+            --bg-color: #f3f4f6;
+            --dark: #111111;
+            --red: #e33e41;
+            --red-hover: #c93033;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --card-bg: #ffffff;
+            --blue: #2563eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #333;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background-color: var(--dark);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #f9fafb;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #9ca3af;
+        }
+
+        .nav-links a.sale {
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        .btn-login {
+            border: 1px solid white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            transition: 0.2s;
+            margin-left: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: white;
+            color: var(--dark) !important;
+        }
+
+        /* Pill Navigation */
+        .pill-nav {
+            background-color: #f8f9fa;
+            padding: 15px 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .pill-list {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pill-list a {
+            padding: 6px 20px;
+            border-radius: 20px;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .pill-list a.active {
+            background-color: white;
+            color: var(--dark);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Layout Grid */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        /* Sidebar Filters */
+        .sidebar {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h4 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #4b5563;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            accent-color: var(--red);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content Area */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .content-header span {
+            color: var(--muted);
+            font-weight: normal;
+            font-size: 1rem;
+        }
+
+        .active-tag {
+            background-color: var(--red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Product Image & Badge */
+        .img-container {
+            position: relative;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .img-container img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Product Details */
+        .card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .title {
+            color: var(--muted);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .stock-info {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Buttons */
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn-buy {
+            flex-grow: 1;
+            background-color: var(--red);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .btn-buy:hover {
+            background-color: var(--red-hover);
+        }
+
+        .btn-heart {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-heart:hover {
+            background: var(--bg-color);
+        }
+
+        /* Responsive Mobile Layout */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar">
+        <a class="logo" href="/">ATOMIC</a>
+        <ul class="nav-links">
+            <li><a onclick="filterCategory('all', this)">Shop All</a></li>
+            <li><a>Men's</a></li>
+            <li><a>Women's</a></li>
+            <li><a>Accessories</a></li>
+            <li><a class="sale">Sale</a></li>
+
+            <!-- DYNAMIC JINJA IF STATEMENT -->
+            {% if session.user %}
+            <li style="display: flex; align-items: center; gap: 15px; margin-left: 15px;">
+                {% if session.role == 'owner' %}
+                <a class="btn-login" href="/admin"
+                    style="background-color: var(--blue); color: white; border-color: var(--blue);">Admin Panel</a>
+                {% endif %}
+                <span style="color: #f9fafb; font-weight: 600;">👤 Hi, {{ session.user }}!</span>
+                <a class="btn-login" href="/logout">Logout</a>
+            </li>
+            {% else %}
+            <li><a class="btn-login" href="/login">Login</a></li>
+            {% endif %}
+
+        </ul>
+    </nav>
+
+    <!-- Secondary Pill Navigation -->
+    <div class="pill-nav">
+        <ul class="pill-list">
+            <li><a class="active" onclick="filterCategory('all', this)">All Apparel</a></li>
+            <li><a onclick="filterCategory('tops', this)">Tops & Tees</a></li>
+            <li><a onclick="filterCategory('bottoms', this)">Bottoms</a></li>
+            <li><a onclick="filterCategory('shoes', this)">Footwear</a></li>
+            <li><a onclick="filterCategory('accessories', this)">Accessories</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Layout Container -->
+    <div class="container">
+
+        <!-- Left Sidebar (Filters) -->
+        <aside class="sidebar">
+            <h4>Filter by</h4>
+
+            <div class="filter-group">
+                <span class="filter-title">Clothing Type</span>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="check1" value="tops"> Tops & Hoodies
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="check2" value="bottoms"> Jeans & Pants
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="check3" value="shoes"> Sneakers
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="check4" value="accessories"> Hats & Accs
+                </label>
+            </div>
+
+            <hr>
+
+            <div class="filter-group">
+                <span class="filter-title">Price Range</span>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="price1" value="under50"> Under $50
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" class="filter-checkbox" id="price2" value="over50"> $50 - $150
+                </label>
+            </div>
+        </aside>
+
+        <!-- Right Content (Grid) -->
+        <main>
+            <div class="content-header">
+                <h2><span id="product-count" style="color: black;">{{ products|length }}</span> <span>(Items
+                        found)</span></h2>
+                <div class="active-tag">⚙️ Filtered View</div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="product-grid" id="product-container">
+                {% for product in products %}
+                <div class="product-item" data-name="{{ product.name | lower }}" data-price="{{ product.price }}">
+                    <div class="card">
+                        <div class="img-container">
+                            <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+                            <div class="badge">🏷️ {{ product.brand }}</div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="price">${{ "%.2f"|format(product.price) }}</div>
+                            <div class="title">{{ product.name }}</div>
+
+                            <div class="stock-info">
+                                <span>📦 {{ product.stock }} In Stock</span>
+                            </div>
+
+                            <div class="actions">
+                                <a href="/checkout/{{ product.id }}" class="btn-buy">Buy Now</a>
+                                <button class="btn-heart">❤️</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Frontend Filtering Logic -->
+    <script>
+        document.querySelectorAll('.filter-checkbox').forEach(cb => {
+            cb.addEventListener('change', applyFilters);
+        });
+
+        function filterCategory(category, element) {
+            document.querySelectorAll('.pill-list a').forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+
+            if (category === 'tops') document.getElementById('check1').checked = true;
+            if (category === 'bottoms') document.getElementById('check2').checked = true;
+            if (category === 'shoes') document.getElementById('check3').checked = true;
+            if (category === 'accessories') document.getElementById('check4').checked = true;
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let activeTypes = [];
+            if (document.getElementById('check1').checked) activeTypes.push('shirt', 'tee', 'hoodie', 'jacket');
+            if (document.getElementById('check2').checked) activeTypes.push('jeans', 'shorts', 'pants');
+            if (document.getElementById('check3').checked) activeTypes.push('sneakers', 'shoes');
+            if (document.getElementById('check4').checked) activeTypes.push('beanie', 'hat');
+
+            let under50 = document.getElementById('price1').checked;
+            let over50 = document.getElementById('price2').checked;
+
+            let items = document.querySelectorAll('.product-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                let name = item.getAttribute('data-name');
+                let price = parseFloat(item.getAttribute('data-price'));
+
+                let typeMatch = false;
+                if (activeTypes.length === 0) {
+                    typeMatch = true;
+                } else {
+                    for (let t of activeTypes) {
+                        if (name.includes(t)) {
+                            typeMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                let priceMatch = false;
+                if (!under50 && !over50) {
+                    priceMatch = true;
+                } else {
+                    if (under50 && price < 50) priceMatch = true;
+                    if (over50 && price >= 50 && price <= 200) priceMatch = true;
+                }
+
+                if (typeMatch && priceMatch) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            document.getElementById('product-count').innerText = visibleCount;
+        }
+    </script>
+</body>
+
+=======
 <!DOCTYPE html>
 <html lang="en">
 
@@ -579,4 +1105,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
+>>>>>>> f3caf30c0cb0460d97c3b2172334b1a5f61cfb71
 </html>
