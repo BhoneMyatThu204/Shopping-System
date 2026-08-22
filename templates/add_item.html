@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Add New Item</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <a href="/" style="text-decoration: none;">
+            <h1>UrbanTech Admin</h1>
+        </a>
+    </header>
+
+    <div class="checkout-container">
+        <h2>Add New Product 📦</h2>
+        <p style="text-align: center; color: var(--text-light); margin-bottom: 2rem;">Fill in the details to add a new
+            item to the store.</p>
+
+        <!-- Add Item Form -->
+        <form action="/admin/add_item" method="POST" class="checkout-form">
+
+            <label for="name">Product Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., Mechanical Keyboard">
+
+            <label for="price">Price ($)</label>
+            <input type="number" id="price" name="price" step="0.01" required placeholder="e.g., 150.00"
+                style="padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem;">
+
+            <label for="stock">Initial Stock Quantity</label>
+            <input type="number" id="stock" name="stock" required placeholder="e.g., 50"
+                style="padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem;">
+
+            <!-- ခလုတ် -->
+            <button type="submit" class="btn checkout-btn" style="background-color: var(--primary);">Save
+                Product</button>
+
+            <a href="/" class="cancel-link" style="margin-top: 20px;">Cancel and go back</a>
+        </form>
+    </div>
+
+</body>
+
+</html>

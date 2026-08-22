@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register | ATOMIC</title>
+    <style>
+        :root {
+            --bg: #f3f4f6;
+            --dark: #111111;
+            --border: #e5e7eb;
+            --red: #e33e41;
+            --red-hover: #c93033;
+            --blue: #2563eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: #333;
+        }
+
+        .navbar {
+            background: var(--dark);
+            padding: 1.2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .navbar a {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h3 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--blue);
+        }
+
+        .btn-submit {
+            background: var(--red);
+            color: white;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--red-hover);
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        .link-text a {
+            color: var(--red);
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar"><a href="/">ATOMIC</a></nav>
+    <div class="container">
+        <div class="card">
+            <h3>Create an Account ✨</h3>
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" required placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required placeholder="Create a password">
+                </div>
+                <button type="submit" class="btn-submit">Register Account</button>
+                <div class="link-text">Already have an account? <br><a href="/login">Login here</a></div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

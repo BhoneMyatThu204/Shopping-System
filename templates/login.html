@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | ATOMIC</title>
+
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --dark: #111111;
+            --border: #e5e7eb;
+            --red: #e33e41;
+            --red-hover: #c93033;
+            --blue: #2563eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--dark);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+
+        /* Centered Form Layout */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--blue);
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--red-hover);
+        }
+
+        .signup-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .signup-link {
+            color: var(--red);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <a class="logo" href="/">ATOMIC</a>
+    </nav>
+
+    <div class="login-container">
+        <div class="card">
+            <h3>Welcome Back 👋</h3>
+
+            <form action="/login" method="POST">
+
+                <div class="form-group">
+                    <label>I am logging in as:</label>
+                    <select name="role" required>
+                        <option value="user" selected>Customer (User)</option>
+                        <option value="owner">Store Owner (Admin)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+
+                <button type="submit" class="btn-submit">Login to Account</button>
+
+                <div class="signup-text">
+                    Don't have an account? <br>
+                    <a href="/register" class="signup-link">Sign up here</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>
