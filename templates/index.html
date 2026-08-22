@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 
@@ -522,4 +523,587 @@
     </script>
 </body>
 
+=======
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Storefront</title>
+    <!-- Bootstrap 5 CSS via Cloudflare -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+
+        .bg-dark-nav {
+            background-color: #111111;
+        }
+
+        .btn-theme-red {
+            background-color: #e33e41;
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-theme-red:hover {
+            background-color: #c93033;
+            color: white;
+        }
+
+        .rounded-4 {
+            border-radius: 1rem !important;
+        }
+
+        .filter-sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .pill-nav {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .pill-nav .nav-link {
+            color: #4b5563;
+            border-radius: 20px;
+            padding: 5px 20px;
+            margin: 0 5px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .pill-nav .nav-link.active {
+            background-color: white;
+            color: black;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .active-tag {
+            background-color: #e33e41;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .img-overlay-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .form-check-input:checked {
+            background-color: #e33e41;
+            border-color: #e33e41;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Dark Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark-nav py-3">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="/">UrbanTech</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto gap-3">
+                    <li class="nav-item"><a class="nav-link text-white" href="#"
+                            onclick="filterCategory('all', this)">Shop All</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">New Arrivals</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Secondary Pill Navigation -->
+    <div class="pill-nav">
+        <div class="container-fluid px-4 d-flex justify-content-center">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link active" onclick="filterCategory('all', this)">All
+                        Peripherals</a></li>
+                <li class="nav-item"><a class="nav-link" onclick="filterCategory('keyboard', this)">Keyboards</a></li>
+                <li class="nav-item"><a class="nav-link" onclick="filterCategory('mouse', this)">Mice</a></li>
+                <li class="nav-item"><a class="nav-link" onclick="filterCategory('monitor', this)">Monitors</a></li>
+                <li class="nav-item"><a class="nav-link" onclick="filterCategory('components', this)">Components</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Layout Container -->
+    <div class="container-fluid px-4 py-4">
+        <div class="row g-4">
+
+            <!-- Left Sidebar (Filters) -->
+            <div class="col-md-3 col-lg-2">
+                <div class="filter-sidebar position-sticky" style="top: 20px;">
+                    <h4 class="fw-bold mb-4">Filter by</h4>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">Product Type</span>
+                            <i class="bi bi-chevron-up"></i>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="check1"
+                                value="keyboard">
+                            <label class="form-check-label" for="check1">Mechanical Keyboard</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="check2" value="mouse">
+                            <label class="form-check-label" for="check2">Wireless Mouse</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="check3" value="monitor">
+                            <label class="form-check-label" for="check3">Monitors</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="check4"
+                                value="components">
+                            <label class="form-check-label" for="check4">Accessories</label>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted">
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">Price Range</span>
+                            <i class="bi bi-chevron-up"></i>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="price1"
+                                value="under200">
+                            <label class="form-check-label" for="price1">Under $200</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input filter-checkbox" type="checkbox" id="price2" value="over200">
+                            <label class="form-check-label" for="price2">$200 - $500</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content (Grid & Tags) -->
+            <div class="col-md-9 col-lg-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <!-- Added ID here to dynamically update the product count -->
+                    <h4 class="mb-0"><strong id="product-count">{{ products|length }}</strong> <span
+                            class="text-muted fs-5">(Products for sale)</span></h4>
+                    <div class="d-flex gap-2">
+                        <span class="active-tag">Filtered View <i class="bi bi-funnel-fill ms-1"
+                                style="font-size: 0.7rem;"></i></span>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="row g-4" id="product-container">
+                    {% for product in products %}
+                    <!-- Added data-name and data-price attributes for JavaScript to read -->
+                    <div class="col-sm-6 col-lg-4 col-xl-3 product-item" data-name="{{ product.name | lower }}"
+                        data-price="{{ product.price }}">
+                        <div class="card product-card h-100">
+                            <!-- Image & Overlay -->
+                            <div class="position-relative">
+                                <img src="{{ url_for('static', filename=product.image) }}" class="card-img-top"
+                                    alt="Product Image" style="height: 220px; object-fit: cover;">
+                                <div class="img-overlay-badge">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ product.brand }}
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="card-body p-4 d-flex flex-column">
+                                <h3 class="fw-bold mb-1">${{ "%.2f"|format(product.price) }}</h3>
+                                <p class="text-muted mb-3">{{ product.name }}</p>
+
+                                <div class="d-flex gap-3 text-dark mb-4 fw-medium">
+                                    <span><i class="bi bi-box me-1"></i> {{ product.stock }} In Stock</span>
+                                    <span><i class="bi bi-shield-check me-1"></i> {{ product.warranty }} Yrs</span>
+                                </div>
+
+                                <div class="d-flex gap-2 mt-auto">
+                                    <a href="/checkout/{{ product.id }}"
+                                        class="btn btn-theme-red flex-grow-1 rounded-3 py-2">Add to Cart</a>
+                                    <button class="btn btn-light border rounded-3 px-3">
+                                        <i class="bi bi-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS via Cloudflare -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Frontend Filtering Logic -->
+    <script>
+        // Trigger filter on any checkbox change
+        document.querySelectorAll('.filter-checkbox').forEach(cb => {
+            cb.addEventListener('change', applyFilters);
+        });
+
+        // Pill Navigation Logic
+        function filterCategory(category, element) {
+            // Remove active style from all pills, add to clicked pill
+            document.querySelectorAll('.pill-nav .nav-link').forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
+
+            // Reset all checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+
+            // Check the corresponding box based on pill clicked
+            if (category === 'keyboard') document.getElementById('check1').checked = true;
+            if (category === 'mouse') document.getElementById('check2').checked = true;
+            if (category === 'monitor') document.getElementById('check3').checked = true;
+            if (category === 'components') document.getElementById('check4').checked = true;
+
+            applyFilters();
+        }
+
+        // Main Filtering Logic
+        function applyFilters() {
+            // Get active category filters
+            let activeTypes = [];
+            if (document.getElementById('check1').checked) activeTypes.push('keyboard');
+            if (document.getElementById('check2').checked) activeTypes.push('mouse');
+            if (document.getElementById('check3').checked) activeTypes.push('monitor');
+            if (document.getElementById('check4').checked) activeTypes.push('headset', 'webcam', 'hub', 'stand', 'mat');
+
+            // Get active price filters
+            let under200 = document.getElementById('price1').checked;
+            let over200 = document.getElementById('price2').checked;
+
+            let items = document.querySelectorAll('.product-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                let name = item.getAttribute('data-name');
+                let price = parseFloat(item.getAttribute('data-price'));
+
+                // Check if item matches selected types
+                let typeMatch = false;
+                if (activeTypes.length === 0) {
+                    typeMatch = true; // Show all if nothing is checked
+                } else {
+                    for (let t of activeTypes) {
+                        if (name.includes(t)) {
+                            typeMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Check if item matches selected prices
+                let priceMatch = false;
+                if (!under200 && !over200) {
+                    priceMatch = true; // Show all if no price is checked
+                } else {
+                    if (under200 && price < 200) priceMatch = true;
+                    if (over200 && price >= 200 && price <= 500) priceMatch = true;
+                }
+
+                // Display or hide card
+                if (typeMatch && priceMatch) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // Update the product counter on the screen
+            document.getElementById('product-count').innerText = visibleCount;
+        }
+    </script>
+</body>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Storefront</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+        }
+
+        .bg-dark-nav {
+            background-color: #111111;
+        }
+
+        .btn-theme-red {
+            background-color: #e33e41;
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+
+        .btn-theme-red:hover {
+            background-color: #c93033;
+            color: white;
+        }
+
+        .rounded-4 {
+            border-radius: 1rem !important;
+        }
+
+        .filter-sidebar {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .product-card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .pill-nav {
+            background-color: #f8f9fa;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .pill-nav .nav-link {
+            color: #4b5563;
+            border-radius: 20px;
+            padding: 5px 20px;
+            margin: 0 5px;
+            font-weight: 500;
+        }
+
+        .pill-nav .nav-link.active {
+            background-color: white;
+            color: black;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .active-tag {
+            background-color: #e33e41;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .img-overlay-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .form-check-input:checked {
+            background-color: #e33e41;
+            border-color: #e33e41;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Dark Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark-nav py-3">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="/">UrbanTech</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto gap-3">
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Shop All</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">New Arrivals</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Best Sellers</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Secondary Pill Navigation -->
+    <div class="pill-nav">
+        <div class="container-fluid px-4 d-flex justify-content-center">
+            <ul class="nav">
+                <li class="nav-item"><a class="nav-link" href="#">Peripherals</a></li>
+                <li class="nav-item"><a class="nav-link active" href="#">Keyboards</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Mice</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Monitors</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Components <i class="bi bi-chevron-down ms-1"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Layout Container -->
+    <div class="container-fluid px-4 py-4">
+        <div class="row g-4">
+
+            <!-- Left Sidebar (Filters) -->
+            <div class="col-md-3 col-lg-2">
+                <div class="filter-sidebar position-sticky" style="top: 20px;">
+                    <h4 class="fw-bold mb-4">Filter by</h4>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">Product Type</span>
+                            <i class="bi bi-chevron-up"></i>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="check1">
+                            <label class="form-check-label" for="check1">Mechanical Keyboard</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="check2">
+                            <label class="form-check-label" for="check2">Wireless Mouse</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="check3">
+                            <label class="form-check-label" for="check3">Monitors</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="check4">
+                            <label class="form-check-label" for="check4">Accessories</label>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted">
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold">Price Range</span>
+                            <i class="bi bi-chevron-up"></i>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="price1">
+                            <label class="form-check-label" for="price1">Under $200</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" checked id="price2">
+                            <label class="form-check-label" for="price2">$200 - $500</label>
+                        </div>
+                        <div class="mt-4">
+                            <input type="range" class="form-range" min="0" max="5" id="customRange2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content (Grid & Tags) -->
+            <div class="col-md-9 col-lg-10">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0"><strong>100</strong> <span class="text-muted fs-5">(Products for sale)</span></h4>
+                    <div class="d-flex gap-2">
+                        <span class="active-tag">Mechanical Keyboard <i class="bi bi-x-lg ms-1"
+                                style="font-size: 0.7rem;"></i></span>
+                        <span class="active-tag">
+                            <$200 - $600 <i class="bi bi-x-lg ms-1" style="font-size: 0.7rem;"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="row g-4">
+                    {% for product in products %}
+                    <div class="col-sm-6 col-lg-4 col-xl-3">
+                        <div class="card product-card h-100">
+                            <!-- Image & Overlay with URL_FOR -->
+                            <div class="position-relative">
+                                <img src="{{ url_for('static', filename=product.image) }}" class="card-img-top"
+                                    alt="Product Image" style="height: 220px; object-fit: cover;">
+                                <div class="img-overlay-badge">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ product.brand }}
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div class="card-body p-4 d-flex flex-column">
+                                <h3 class="fw-bold mb-1">${{ "%.2f"|format(product.price) }}</h3>
+                                <p class="text-muted mb-3">{{ product.name }}</p>
+
+                                <div class="d-flex gap-3 text-dark mb-4 fw-medium">
+                                    <span><i class="bi bi-box me-1"></i> {{ product.stock }} In Stock</span>
+                                    <span><i class="bi bi-shield-check me-1"></i> {{ product.warranty }} Yrs</span>
+                                </div>
+
+                                <div class="d-flex gap-2 mt-auto">
+                                    <a href="/checkout/{{ product.id }}"
+                                        class="btn btn-theme-red flex-grow-1 rounded-3 py-2">Add to Cart</a>
+                                    <button class="btn btn-light border rounded-3 px-3">
+                                        <i class="bi bi-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+>>>>>>> f3caf30c0cb0460d97c3b2172334b1a5f61cfb71
 </html>
