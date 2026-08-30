@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase History | ATOMIC</title>
+    <style>
+        :root {
+            --bg: #f3f4f6;
+            --dark: #111111;
+            --border: #e5e7eb;
+            --blue: #2563eb;
+            --green: #16a34a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: #333;
+        }
+
+        .navbar {
+            background: var(--dark);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .navbar .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: 1px solid white;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: white;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--green);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a class="logo" href="/">ATOMIC</a>
+        <div class="nav-links">
+            <a href="/">Continue Shopping</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>📜 My Purchase History</h2>
+            {% if orders|length > 0 %}
+            <table>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Image</th>
+                    <th>Product Details</th>
+                    <th>Total Paid</th>
+                    <th>Status / Review</th>
+                </tr>
+                {% for order in orders %}
+                <tr>
+                    <td style="color: #6b7280;">#{{ order[0] }}</td>
+                    <td><img src="{{ url_for('static', filename=order[5]) }}" class="product-img"></td>
+                    <td>
+                        <strong style="display: block;">{{ order[1] }}</strong>
+                        <span style="font-size: 0.85rem; color: #6b7280;">Size: {{ order[6] }} | Qty: {{ order[2]
+                            }}</span>
+                    </td>
+                    <td style="font-weight: bold; color: var(--blue);">${{ "%.2f"|format(order[3]) }}</td>
+                    <td>
+                        {% if order[4] == 'Pending' %}
+                        <span
+                            style="color: #d97706; font-weight: bold; background: #fef3c7; padding: 5px 10px; border-radius: 10px; font-size: 0.85rem;">⏳
+                            Pending Delivery</span>
+                        {% else %}
+                        <span
+                            style="color: var(--green); font-weight: bold; background: #dcfce7; padding: 5px 10px; border-radius: 10px; font-size: 0.85rem; display: inline-block; margin-bottom: 10px;">✅
+                            Delivered</span>
+
+                        <!-- NEW: Rating System -->
+                        {% if order[7] == 0 %}
+                        <form action="/rate_order/{{ order[0] }}" method="POST"
+                            style="display: flex; gap: 5px; flex-direction: column;">
+                            <select name="rating" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                                <option value="4">⭐⭐⭐⭐ (Good)</option>
+                                <option value="3">⭐⭐⭐ (Average)</option>
+                                <option value="2">⭐⭐ (Poor)</option>
+                                <option value="1">⭐ (Terrible)</option>
+                            </select>
+                            <div style="display: flex; gap: 5px;">
+                                <input type="text" name="review_comment" placeholder="Write a review..."
+                                    style="padding: 5px; border: 1px solid #ccc; border-radius: 5px; flex: 1;">
+                                <button type="submit" class="btn-sm btn-success">Rate</button>
+                            </div>
+                        </form>
+                        {% else %}
+                        <div style="font-size: 0.85rem; color: #4b5563; margin-top: 5px;">
+                            <strong>Your Rating:</strong> {{ order[7] }} ⭐ <br>
+                            <em>"{{ order[8] }}"</em>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 3rem 0; color: #6b7280;">
+                <h3>No past orders found.</h3>
+                <a href="/"
+                    style="display: inline-block; margin-top: 20px; color: var(--blue); font-weight: bold; text-decoration: none;">Start
+                    shopping</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

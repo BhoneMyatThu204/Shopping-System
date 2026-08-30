@@ -1,40 +1,42 @@
-<<<<<<< HEAD
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash, jsonify
 import sqlite3
 import database
-from Order import Order
 import os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "atomic_super_secret_key"
-
-# Configure exactly where uploaded images should be saved
 app.config['UPLOAD_FOLDER'] = 'static/images'
 
 def is_valid_credit_card(card_number):
     card_number = card_number.replace(" ", "").replace("-", "")
     if not card_number.isdigit(): return False
-    digits = [int(x) for x in card_number][::-1]
-    doubled = [x * 2 if i % 2 != 0 else x for i, x in enumerate(digits)]
-    subtracted = [x - 9 if x > 9 else x for x in doubled]
-    return sum(subtracted) % 10 == 0
+    return sum([x * 2 if i % 2 != 0 else x for i, x in enumerate([int(x) for x in card_number][::-1])]) % 10 == 0
 
 @app.route('/')
 def home():
     conn = database.connect_db()
     cursor = conn.cursor()
-    
-    # We now fetch the 'image' column directly from the database!
-    cursor.execute("SELECT id, name, price, stock, image FROM products")
+    # ပစ္စည်းတစ်ခုစီအတွက် ပျမ်းမျှ Rating ကိုပါ တွက်ချက်ယူမည်
+    cursor.execute("""
+        SELECT p.id, p.name, p.price, p.stock, p.image, p.discount, 
+               IFNULL(AVG(NULLIF(o.rating, 0)), 0) as avg_rating 
+        FROM products p 
+        LEFT JOIN orders o ON p.id = o.product_id 
+        GROUP BY p.id
+    """)
     db_products = cursor.fetchall()
 
     products = []
     for row in db_products:
+        original_price = row[2]
+        discount = row[5]
+        final_price = original_price - (original_price * discount / 100)
+        
         products.append({
-            "id": row[0], "name": row[1], "price": row[2], "stock": row[3],
-            "brand": "Atomic Apparels", "warranty": 1, 
-            "image": f"images/{row[4]}" # Uses the actual uploaded image name
+            "id": row[0], "name": row[1], "price": original_price, "final_price": final_price,
+            "stock": row[3], "brand": "Atomic Apparels", "image": f"images/{row[4]}", 
+            "discount": discount, "rating": row[6]
         })
     return render_template('index.html', products=products)
 
@@ -50,85 +52,226 @@ def register():
             conn.commit()
             session['user'] = username
             session['role'] = 'user'
+            flash("Account created successfully! 🎉", "success")
             return redirect('/')
         except sqlite3.IntegrityError:
-            return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Username already taken ❌</h1><br><a href='/register' style='padding: 10px 20px; background: #e33e41; color: white; text-decoration: none; border-radius: 5px;'>Try Again</a></div>"
+            flash("Username already taken ❌", "error")
+            return redirect('/register')
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        role = request.form.get('role') 
         username = request.form.get('username')
         password = request.form.get('password')
         conn = database.connect_db()
         cursor = conn.cursor()
-        
-        cursor.execute("SELECT * FROM users WHERE username=? AND password=? AND role=?", (username, password, role))
+        cursor.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
         user = cursor.fetchone()
 
         if user:
-            session['user'] = username  
-            session['role'] = role
-            if role == 'owner': return redirect('/admin')
+            session['user'] = user[1]  
+            session['role'] = user[3]
+            flash(f"Welcome back, {session['user']}! 👋", "success")
+            if session['role'] == 'owner': return redirect('/admin')
             return redirect('/') 
         else:
-            return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Invalid Credentials ❌</h1><br><a href='/login' style='padding: 10px 20px; background: #6b7280; color: white; text-decoration: none; border-radius: 5px;'>Try Again</a></div>"
+            flash("Invalid Credentials ❌", "error")
+            return redirect('/login')
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     session.pop('role', None)
+    flash("Logged out successfully.", "success")
     return redirect('/')
+
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+def add_to_cart(product_id):
+    if 'user' not in session or session.get('role') != 'user':
+        return jsonify({"status": "error", "message": "Please login first"}), 401
+        
+    username = session['user']
+    quantity = int(request.form.get('quantity', 1))
+    size = request.form.get('size', 'M')
+    
+    conn = database.connect_db()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT stock FROM products WHERE id=?", (product_id,))
+    stock = cursor.fetchone()[0]
+    if stock < quantity:
+        return jsonify({"status": "error", "message": "Not enough stock available! ❌"}), 400
+
+    cursor.execute("SELECT id, quantity FROM cart WHERE username=? AND product_id=? AND size=?", (username, product_id, size))
+    item = cursor.fetchone()
+    
+    if item:
+        new_quantity = item[1] + quantity
+        if new_quantity > stock:
+            return jsonify({"status": "error", "message": f"Cannot add more. Only {stock} left in stock! ❌"}), 400
+        cursor.execute("UPDATE cart SET quantity = ? WHERE id=?", (new_quantity, item[0]))
+    else:
+        cursor.execute("INSERT INTO cart (username, product_id, quantity, size) VALUES (?, ?, ?, ?)", (username, product_id, quantity, size))
+        
+    conn.commit()
+    return jsonify({"status": "success", "message": f"{quantity} item(s) added to cart! 🛒"}), 200
+
+@app.route('/cart')
+def view_cart():
+    if 'user' not in session or session.get('role') != 'user': return redirect('/login')
+    username = session['user']
+    conn = database.connect_db()
+    cursor = conn.cursor()
+    cursor.execute('''SELECT cart.id, products.name, products.price, cart.quantity, products.image, products.id, products.discount, cart.size FROM cart JOIN products ON cart.product_id = products.id WHERE cart.username=?''', (username,))
+    
+    raw_items = cursor.fetchall()
+    cart_items = []
+    total_price = 0
+    for row in raw_items:
+        price = row[2]
+        discount = row[6]
+        final_price = price - (price * discount / 100)
+        subtotal = final_price * row[3]
+        total_price += subtotal
+        cart_items.append({"cart_id": row[0], "name": row[1], "final_price": final_price, "quantity": row[3], "image": row[4], "size": row[7]})
+        
+    return render_template('cart.html', cart_items=cart_items, total_price=total_price)
+
+@app.route('/remove_from_cart/<int:cart_id>', methods=['POST'])
+def remove_from_cart(cart_id):
+    if 'user' in session and session.get('role') == 'user':
+        conn = database.connect_db()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM cart WHERE id=? AND username=?", (cart_id, session['user']))
+        conn.commit()
+        flash("Item removed from cart.", "success")
+    return redirect('/cart')
+
+@app.route('/checkout_cart')
+def checkout_cart_page():
+    if 'user' not in session or session.get('role') != 'user': return redirect('/login')
+    return render_template('checkout_cart.html')
+
+@app.route('/pay_cart', methods=['POST'])
+def pay_cart():
+    if 'user' not in session or session.get('role') != 'user': return redirect('/login')
+
+    username = session['user']
+    payment_method = request.form.get('payment_method')
+    account_info = request.form.get('account_info') 
+    order_note = request.form.get('order_note', '')
+
+    payment_successful = False
+    display_method = ""
+
+    if payment_method == 'cod':
+        payment_successful = True
+        display_method = "Cash on Delivery"
+    elif payment_method == 'other':
+        if is_valid_credit_card(account_info):
+            payment_successful = True
+            display_method = "Credit Card"
+    else:
+        clean_number = account_info.replace(" ", "").replace("-", "") if account_info else ""
+        if clean_number.isdigit() and len(clean_number) >= 9:
+            payment_successful = True
+            method_names = {'kbz': 'KBZ Pay', 'wave': 'Wave Money', 'ayeya': 'Ayeya Pay', 'aplus': 'A+ Pay'}
+            display_method = method_names.get(payment_method, 'Mobile Wallet')
+
+    if payment_successful:
+        conn = database.connect_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT product_id, quantity, size FROM cart WHERE username=?", (username,))
+        cart_items = cursor.fetchall()
+
+        if not cart_items:
+            flash("Your cart is empty.", "error")
+            return redirect('/')
+
+        for item in cart_items:
+            product_id, quantity, size = item[0], item[1], item[2]
+            cursor.execute("SELECT price, stock, discount FROM products WHERE id=?", (product_id,))
+            product = cursor.fetchone()
+            
+            if product and product[1] >= quantity:
+                final_price = product[0] - (product[0] * product[2] / 100)
+                total_price = final_price * quantity
+                cursor.execute("INSERT INTO orders (username, product_id, quantity, size, total_price, status, order_note, rating, review_comment) VALUES (?, ?, ?, ?, ?, ?, ?, 0, '')", 
+                               (username, product_id, quantity, size, total_price, "Pending", order_note))
+                cursor.execute("UPDATE products SET stock = stock - ? WHERE id=?", (quantity, product_id))
+        
+        cursor.execute("DELETE FROM cart WHERE username=?", (username,))
+        conn.commit()
+        flash(f"Order Placed! Paid via {display_method}. 🎉", "success")
+        return redirect('/history')
+    else:
+        flash("Payment Failed ❌ Please check your details.", "error")
+        return redirect('/checkout_cart')
+
+@app.route('/history')
+def history():
+    if 'user' not in session or session.get('role') != 'user': return redirect('/login')
+    conn = database.connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT orders.id, products.name, orders.quantity, orders.total_price, orders.status, products.image, orders.size, orders.rating, orders.review_comment
+        FROM orders JOIN products ON orders.product_id = products.id
+        WHERE orders.username=? ORDER BY orders.id DESC
+    """, (session['user'],))
+    orders = cursor.fetchall()
+    return render_template('history.html', orders=orders)
+
+@app.route('/rate_order/<int:order_id>', methods=['POST'])
+def rate_order(order_id):
+    if 'user' not in session or session.get('role') != 'user': return redirect('/login')
+    rating = int(request.form.get('rating', 5))
+    comment = request.form.get('review_comment', '')
+    
+    conn = database.connect_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE orders SET rating=?, review_comment=? WHERE id=? AND username=?", (rating, comment, order_id, session['user']))
+    conn.commit()
+    flash("Thank you for your feedback! ⭐", "success")
+    return redirect('/history')
 
 @app.route('/admin')
 def admin():
     if session.get('role') != 'owner': return redirect('/')
     conn = database.connect_db()
     cursor = conn.cursor()
-    
     cursor.execute("SELECT SUM(stock) FROM products")
-    total_stock = cursor.fetchone()[0]
-    if total_stock is None: total_stock = 0
-    
+    total_stock = cursor.fetchone()[0] or 0
     cursor.execute("SELECT * FROM products ORDER BY id DESC")
     products = cursor.fetchall()
     
     cursor.execute("""
-        SELECT orders.id, products.name, orders.quantity, orders.total_price, orders.status 
-        FROM orders 
-        JOIN products ON orders.product_id = products.id
-        ORDER BY orders.id DESC
+        SELECT orders.id, products.name, orders.quantity, orders.total_price, orders.status, orders.username, orders.size, orders.order_note 
+        FROM orders JOIN products ON orders.product_id = products.id ORDER BY orders.id DESC
     """)
     orders = cursor.fetchall()
-    
     return render_template('admin.html', products=products, orders=orders, total_stock=total_stock)
 
-# --- UPDATED: IMAGE UPLOAD ROUTE ---
 @app.route('/admin/add_product', methods=['POST'])
 def add_product():
     if session.get('role') == 'owner':
         name = request.form.get('name')
         price = float(request.form.get('price'))
         stock = int(request.form.get('stock'))
+        discount = int(request.form.get('discount')) 
         
-        # 1. Grab the image file from the HTML form
         image_file = request.files.get('image')
-        image_filename = "placeholder.jpg" # Default fallback
-        
-        # 2. If an image was uploaded, save it securely to static/images
+        image_filename = "placeholder.jpg" 
         if image_file and image_file.filename != '':
             image_filename = secure_filename(image_file.filename)
-            # Make sure the static/images folder exists before saving!
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             image_file.save(os.path.join(app.config['UPLOAD_FOLDER'], image_filename))
-        
-        # 3. Save everything to the database
         conn = database.connect_db()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO products (name, price, stock, image) VALUES (?, ?, ?, ?)", (name, price, stock, image_filename))
+        cursor.execute("INSERT INTO products (name, price, stock, image, discount) VALUES (?, ?, ?, ?, ?)", (name, price, stock, image_filename, discount))
         conn.commit()
+        flash("Product added successfully!", "success")
     return redirect('/admin')
 
 @app.route('/admin/delete_product/<int:product_id>', methods=['POST'])
@@ -138,6 +281,7 @@ def delete_product(product_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM products WHERE id=?", (product_id,))
         conn.commit()
+        flash("Product removed.", "success")
     return redirect('/admin')
 
 @app.route('/admin/accept_order/<int:order_id>', methods=['POST'])
@@ -147,193 +291,8 @@ def accept_order(order_id):
         cursor = conn.cursor()
         cursor.execute("UPDATE orders SET status='Accepted' WHERE id=?", (order_id,))
         conn.commit()
+        flash("Order accepted.", "success")
     return redirect('/admin')
 
-@app.route('/checkout/<int:product_id>')
-def checkout(product_id):
-    if 'user' not in session: return redirect('/login')
-    return render_template('checkout.html', product_id=product_id)
-
-@app.route('/pay/<int:product_id>', methods=['POST'])
-def pay(product_id):
-    name = request.form.get('name')
-    payment_method = request.form.get('payment_method')
-    account_info = request.form.get('account_info') 
-
-    payment_successful = False
-    display_method = ""
-
-    if payment_method == 'other':
-        if is_valid_credit_card(account_info):
-            payment_successful = True
-            display_method = "Credit Card"
-    else:
-        clean_number = account_info.replace(" ", "").replace("-", "")
-        if clean_number.isdigit() and len(clean_number) >= 9:
-            payment_successful = True
-            method_names = {'kbz': 'KBZ Pay', 'wave': 'Wave Money', 'ayeya': 'Ayeya Pay', 'aplus': 'A+ Pay'}
-            display_method = method_names.get(payment_method, 'Mobile Wallet')
-
-    if payment_successful:
-        conn = database.connect_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT stock FROM products WHERE id=?", (product_id,))
-        result = cursor.fetchone()
-
-        if result and result[0] > 0:
-            my_order = Order(conn)
-            my_order.place_order(product_id, 1) 
-            return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #16a34a;'>Payment Successful! 🎉</h1><p style='font-size: 1.2rem;'>Thank you, <strong>{name}</strong>. Your <strong>{display_method}</strong> transaction is complete and inventory has been updated.</p><a href='/' style='padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Return to Shop</a></div>"
-        else:
-            return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #e33e41;'>Out of Stock ❌</h1><p style='font-size: 1.2rem;'>Sorry, this item is currently out of stock.</p><a href='/' style='padding: 10px 20px; background: #6b7280; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Go Back</a></div>"
-    else:
-        return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #e33e41;'>Payment Failed ❌</h1><p style='font-size: 1.2rem;'>Please check your payment details and try again.</p><a href='javascript:history.back()' style='padding: 10px 20px; background: #6b7280; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Go Back</a></div>"
-
 if __name__ == '__main__':
-=======
-from flask import Flask, render_template, request, redirect
-import database
-from Order import Order
-
-app = Flask(__name__)
-
-# --- MATH LOGIC FOR "OTHER" (CREDIT CARDS) ---
-def is_valid_credit_card(card_number):
-    card_number = card_number.replace(" ", "").replace("-", "")
-    if not card_number.isdigit(): return False
-    digits = [int(x) for x in card_number][::-1]
-    doubled = [x * 2 if i % 2 != 0 else x for i, x in enumerate(digits)]
-    subtracted = [x - 9 if x > 9 else x for x in doubled]
-    return sum(subtracted) % 10 == 0
-
-# --- ROUTES ---
-@app.route('/')
-def home():
-    # 1. Connect to your SQLite Database
-    conn = database.connect_db()
-    cursor = conn.cursor()
-    
-    # 2. Fetch all real products from shopping.db
-    cursor.execute("SELECT id, name, price, stock FROM products")
-    db_products = cursor.fetchall()
-    
-    # 3. Format the database rows into dictionaries so your HTML UI can read them
-    products = []
-    for row in db_products:
-        products.append({
-            "id": row[0],
-            "name": row[1],
-            "price": row[2],
-            "stock": row[3],
-            "brand": "TechCorp", # UI filler
-            "warranty": 1,       # UI filler
-            "image": f"images/product_{row[0]:03}.jpg" # Dynamically loads product_001.jpg based on DB id!
-        })
-        
-    return render_template('index.html', products=products)
-
-@app.route('/checkout/<int:product_id>')
-def checkout(product_id):
-    # We pass the product_id to the checkout page so it knows what the user is buying
-    return render_template('checkout.html', product_id=product_id)
-
-# Notice we added <int:product_id> here so the payment route knows which product to deduct from inventory
-@app.route('/pay/<int:product_id>', methods=['POST'])
-def pay(product_id):
-    name = request.form.get('name')
-    payment_method = request.form.get('payment_method')
-    account_info = request.form.get('account_info') 
-    
-    payment_successful = False
-    display_method = ""
-    
-    # Validate Payment Details
-    if payment_method == 'other':
-        if is_valid_credit_card(account_info):
-            payment_successful = True
-            display_method = "Credit Card"
-    else:
-        clean_number = account_info.replace(" ", "").replace("-", "")
-        if clean_number.isdigit() and len(clean_number) >= 9:
-            payment_successful = True
-            method_names = {'kbz': 'KBZ Pay', 'wave': 'Wave Money', 'ayeya': 'Ayeya Pay', 'aplus': 'A+ Pay'}
-            display_method = method_names.get(payment_method, 'Mobile Wallet')
-            
-    # Process the Order if Payment is Valid
-    if payment_successful:
-        conn = database.connect_db()
-        cursor = conn.cursor()
-        
-        # Security Check: Ensure the item isn't out of stock before processing
-        cursor.execute("SELECT stock FROM products WHERE id=?", (product_id,))
-        result = cursor.fetchone()
-        
-        if result and result[0] > 0:
-            # Connect to your Order.py logic!
-            my_order = Order(conn)
-            my_order.place_order(product_id, 1) # Assuming user buys a quantity of 1
-            
-            return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #198754;'>Payment Successful! 🎉</h1><p style='font-size: 1.2rem;'>Thank you, <strong>{name}</strong>. Your <strong>{display_method}</strong> transaction is complete and inventory has been updated.</p><a href='/' style='padding: 10px 20px; background: #0d6efd; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Return to Shop</a></div>"
-        else:
-            return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #dc3545;'>Out of Stock ❌</h1><p style='font-size: 1.2rem;'>Sorry, this item is currently out of stock.</p><a href='/' style='padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Go Back</a></div>"
-    
-    else:
-        return f"<div style='font-family: sans-serif; text-align: center; margin-top: 100px;'><h1 style='color: #dc3545;'>Payment Failed ❌</h1><p style='font-size: 1.2rem;'>Please check your payment details and try again.</p><a href='javascript:history.back()' style='padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px;'>Go Back</a></div>"
-
-if __name__ == '__main__':
-from flask import Flask, render_template, request
-import random # Added this import for the generator
-
-app = Flask(__name__)
-
-def is_valid_credit_card(card_number):
-    card_number = card_number.replace(" ", "").replace("-", "")
-    if not card_number.isdigit(): return False
-    digits = [int(x) for x in card_number][::-1]
-    doubled = [x * 2 if i % 2 != 0 else x for i, x in enumerate(digits)]
-    subtracted = [x - 9 if x > 9 else x for x in doubled]
-    return sum(subtracted) % 10 == 0
-
-# --- NEW GENERATOR PLACED HERE ---
-def generate_mock_products():
-    products = []
-    base_names = ["Mechanical Keyboard", "Wireless Mouse", "4K Ultra HD Monitor", "Gaming Headset", "HD Webcam", "USB-C Hub", "Laptop Stand", "Ergonomic Desk Mat"]
-    base_brands = ["TechCorp, CA", "ErgoLogi, TX", "VisionX, NY", "AudioPro, WA", "GearUp, FL"]
-    
-    for i in range(1, 101):
-        name = random.choice(base_names)
-        products.append({
-            "id": i, 
-            "name": f"{name} Gen-{random.randint(1, 9)}", 
-            "price": round(random.uniform(25.0, 499.0), 2), 
-            "brand": random.choice(base_brands), 
-            "stock": random.randint(0, 15), 
-            "warranty": random.randint(1, 5), 
-            "image": f"images/product_{i:03}.jpg" # Pulls from your static/images folder
-        })
-    return products
-
-# Generate the items once when the server starts
-MOCK_PRODUCTS = generate_mock_products()
-
-@app.route('/')
-def home():
-    # We replaced the hardcoded list with the MOCK_PRODUCTS variable
-    return render_template('index.html', products=MOCK_PRODUCTS)
-
-@app.route('/checkout/<int:product_id>')
-def checkout(product_id):
-    return render_template('checkout.html', product_id=product_id)
-
-@app.route('/pay', methods=['POST'])
-def pay():
-    name = request.form.get('name')
-    card_number = request.form.get('card_number')
-    if is_valid_credit_card(card_number):
-        return f"<div style='text-align: center; margin-top: 100px;'><h1 style='color: #198754;'>Payment Successful! 🎉</h1><a href='/'>Return</a></div>"
-    else:
-        return f"<div style='text-align: center; margin-top: 100px;'><h1 style='color: #dc3545;'>Payment Failed ❌</h1><a href='javascript:history.back()'>Go Back</a></div>"
-
-if __name__ == '__main__':
->>>>>>> f3caf30c0cb0460d97c3b2172334b1a5f61cfb71
     app.run(debug=True)

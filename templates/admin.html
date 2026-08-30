@@ -53,13 +53,8 @@
             border-radius: 20px;
         }
 
-        .navbar .nav-links a:hover {
-            background: white;
-            color: var(--dark);
-        }
-
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             padding: 0 2rem;
             display: grid;
@@ -82,7 +77,6 @@
             border-bottom: 2px solid var(--border);
         }
 
-        /* Stats Widget */
         .stats-widget {
             background: var(--dark);
             color: white;
@@ -90,7 +84,6 @@
             border-radius: 1rem;
             text-align: center;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .stats-widget h4 {
@@ -104,7 +97,6 @@
             color: #60a5fa;
         }
 
-        /* Form */
         .form-group {
             margin-bottom: 1rem;
         }
@@ -134,7 +126,6 @@
             margin-top: 1rem;
         }
 
-        /* Buttons */
         .btn-sm {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
@@ -149,23 +140,15 @@
             background-color: var(--red);
         }
 
-        .btn-danger:hover {
-            background-color: var(--red-hover);
-        }
-
         .btn-success {
             background-color: var(--green);
         }
 
-        .btn-success:hover {
-            background-color: var(--green-hover);
-        }
-
-        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
+            font-size: 0.95rem;
         }
 
         th,
@@ -173,16 +156,11 @@
             text-align: left;
             padding: 0.75rem;
             border-bottom: 1px solid var(--border);
-            vertical-align: middle;
+            vertical-align: top;
         }
 
         th {
             background: #f8f9fa;
-        }
-
-        table form {
-            display: inline;
-            margin: 0;
         }
     </style>
 </head>
@@ -197,30 +175,28 @@
     </nav>
 
     <div class="container">
-        <!-- Left Side: Add Product & Stats -->
         <div>
             <div class="stats-widget">
                 <h4>Total Items in Stock</h4>
                 <h2>📦 {{ total_stock }}</h2>
             </div>
-
             <div class="card">
                 <h3>➕ Add New Product</h3>
-                <!-- ENCTYPE ADDED HERE FOR IMAGE UPLOADS -->
                 <form action="/admin/add_product" method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Product Name</label>
                         <input type="text" name="name" required placeholder="e.g. Graphic Tee">
                     </div>
-                    <div class="form-group">
-                        <label>Price ($)</label>
-                        <input type="number" step="0.01" name="price" required placeholder="19.99">
+                    <div class="form-group" style="display: flex; gap: 10px;">
+                        <div style="flex: 1;"><label>Price ($)</label><input type="number" step="0.01" name="price"
+                                required placeholder="19.99"></div>
+                        <div style="flex: 1;"><label>Discount (%)</label><input type="number" name="discount" value="0"
+                                min="0" max="100" required></div>
                     </div>
                     <div class="form-group">
                         <label>Stock Quantity</label>
                         <input type="number" name="stock" required placeholder="50">
                     </div>
-                    <!-- NEW IMAGE FILE INPUT ADDED HERE -->
                     <div class="form-group">
                         <label>Product Image</label>
                         <input type="file" name="image" accept="image/*" required
@@ -231,48 +207,40 @@
             </div>
         </div>
 
-        <!-- Right Side: Orders and Inventory Lists -->
         <div>
             <div class="card">
                 <h3>📦 Customer Orders</h3>
                 <table>
                     <tr>
-                        <th>ID</th>
-                        <th>Product</th>
-                        <th>Qty</th>
+                        <th>Customer</th>
+                        <th>Product Details</th>
                         <th>Total</th>
-                        <th>Status</th>
+                        <th>Note</th>
                         <th>Action</th>
                     </tr>
                     {% for order in orders %}
                     <tr>
-                        <td>#{{ order[0] }}</td>
-                        <td>{{ order[1] }}</td>
-                        <td>{{ order[2] }}</td>
-                        <td style="font-weight: bold;">${{ "%.2f"|format(order[3]) }}</td>
-
-                        <!-- Order Status Logic -->
+                        <td style="font-weight: bold; color: var(--blue);">{{ order[5] }}</td>
                         <td>
-                            {% if order[4] == 'Pending' %}
-                            <span style="color: #d97706; font-weight: bold;">⏳ Pending</span>
-                            {% else %}
-                            <span style="color: var(--green); font-weight: bold;">✅ Accepted</span>
-                            {% endif %}
+                            <strong>{{ order[1] }}</strong><br>
+                            <span style="font-size: 0.85rem; color: #6b7280;">Size: {{ order[6] }} | Qty: {{ order[2]
+                                }}</span>
                         </td>
-
+                        <td style="font-weight: bold;">${{ "%.2f"|format(order[3]) }}</td>
+                        <td style="font-size: 0.85rem; color: #4b5563; max-width: 150px;">{{ order[7] }}</td>
                         <td>
                             {% if order[4] == 'Pending' %}
                             <form action="/admin/accept_order/{{ order[0] }}" method="POST">
                                 <button type="submit" class="btn-sm btn-success">Accept</button>
                             </form>
                             {% else %}
-                            -
+                            <span style="color: var(--green); font-weight: bold; font-size: 0.85rem;">✅ Accepted</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" style="text-align: center; color: gray;">No orders yet.</td>
+                        <td colspan="5" style="text-align: center; color: gray;">No orders yet.</td>
                     </tr>
                     {% endfor %}
                 </table>
@@ -283,20 +251,22 @@
                 <div style="max-height: 400px; overflow-y: auto;">
                     <table>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Price</th>
+                            <th>Sale</th>
                             <th>Stock</th>
                             <th>Action</th>
                         </tr>
                         {% for product in products %}
                         <tr>
-                            <td>{{ product[0] }}</td>
-                            <td>{{ product[1] }}</td>
+                            <td style="font-weight: bold;">{{ product[1] }}</td>
                             <td>${{ "%.2f"|format(product[2]) }}</td>
-                            <td>{{ product[3] }}</td>
+                            <td style="color: #e33e41; font-weight: bold;">{% if product[5] > 0 %}{{ product[5] }}%{%
+                                else %}-{% endif %}</td>
+                            <td
+                                style="color: {% if product[3] == 0 %}#e33e41{% else %}black{% endif %}; font-weight: {% if product[3] == 0 %}bold{% else %}normal{% endif %};">
+                                {{ product[3] }}</td>
                             <td>
-                                <!-- Delete Product Button -->
                                 <form action="/admin/delete_product/{{ product[0] }}" method="POST"
                                     onsubmit="return confirm('Delete this product?');">
                                     <button type="submit" class="btn-sm btn-danger">Remove</button>
