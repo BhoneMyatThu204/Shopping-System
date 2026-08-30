@@ -3,17 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | ATOMIC</title>
     <style>
-        :root {
-            --bg: #f3f4f6;
-            --dark: #111111;
-            --border: #e5e7eb;
-            --red: #e33e41;
-            --red-hover: #c93033;
-            --blue: #2563eb;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -22,45 +14,31 @@
         }
 
         body {
-            background: var(--bg);
-            color: #333;
-        }
-
-        .navbar {
-            background: var(--dark);
-            padding: 1.2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .navbar a {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 800;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-
-        .container {
+            background-color: #f3f4f6;
             display: flex;
             justify-content: center;
-            padding: 0 1rem;
+            align-items: center;
+            height: 100vh;
+            color: #333;
         }
 
         .card {
             background: white;
             padding: 2.5rem;
-            width: 100%;
-            max-width: 450px;
             border-radius: 1rem;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #e5e7eb;
         }
 
-        h3 {
+        .logo {
             text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #111;
+            margin-bottom: 2rem;
         }
 
         .form-group {
@@ -69,31 +47,31 @@
 
         label {
             display: block;
-            margin-bottom: 0.5rem;
             font-weight: 600;
+            margin-bottom: 0.5rem;
             font-size: 0.95rem;
         }
 
         input {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
-            font-size: 1rem;
             outline: none;
             transition: 0.2s;
         }
 
         input:focus {
-            border-color: var(--blue);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .btn-submit {
-            background: var(--red);
+            width: 100%;
+            background: linear-gradient(45deg, #111, #333);
             color: white;
             border: none;
-            padding: 1rem;
-            width: 100%;
+            padding: 0.8rem;
             border-radius: 0.5rem;
             font-weight: 700;
             font-size: 1rem;
@@ -103,47 +81,71 @@
         }
 
         .btn-submit:hover {
-            background: var(--red-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .link-text {
+        .link {
+            display: block;
             text-align: center;
             margin-top: 1.5rem;
-            font-size: 0.95rem;
             color: #6b7280;
-        }
-
-        .link-text a {
-            color: var(--red);
-            font-weight: bold;
             text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
-        .link-text a:hover {
-            text-decoration: underline;
+        .link:hover {
+            color: #2563eb;
+        }
+
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .alert.error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #f87171;
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar"><a href="/">ATOMIC</a></nav>
-    <div class="container">
-        <div class="card">
-            <h3>Create an Account ✨</h3>
-            <form action="/register" method="POST">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" name="username" required placeholder="Choose a username">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" name="password" required placeholder="Create a password">
-                </div>
-                <button type="submit" class="btn-submit">Register Account</button>
-                <div class="link-text">Already have an account? <br><a href="/login">Login here</a></div>
-            </form>
-        </div>
+
+    <div class="card">
+        <div class="logo">ATOMIC</div>
+
+        <!-- Error Message ပြရန် -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Form တွင် action="/register" နှင့် method="POST" သေချာပါရမည် -->
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" required placeholder="Choose a username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Create a password">
+            </div>
+            <button type="submit" class="btn-submit">Create Account</button>
+        </form>
+
+        <a href="/login" class="link">Already have an account? Log in</a>
     </div>
+
 </body>
 
 </html>

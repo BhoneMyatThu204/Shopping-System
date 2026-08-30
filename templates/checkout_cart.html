@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Checkout | ATOMIC</title>
-
+    <title>Cart Checkout | ATOMIC</title>
     <style>
         :root {
             --bg-color: #f3f4f6;
@@ -20,7 +19,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
         }
 
         body {
@@ -28,9 +27,8 @@
             color: #333;
         }
 
-        /* Navbar */
         .navbar {
-            background-color: var(--dark);
+            background: var(--dark);
             padding: 1.2rem 2rem;
             display: flex;
             justify-content: center;
@@ -45,7 +43,6 @@
             text-decoration: none;
         }
 
-        /* Centered Form Layout */
         .checkout-container {
             display: flex;
             justify-content: center;
@@ -75,7 +72,6 @@
             margin: 1.5rem 0;
         }
 
-        /* Form Inputs */
         .form-group {
             margin-bottom: 1.2rem;
         }
@@ -87,17 +83,19 @@
             font-size: 0.95rem;
         }
 
-        input[type="text"] {
+        input[type="text"],
+        textarea {
             width: 100%;
             padding: 0.75rem 1rem;
             border: 1px solid var(--border);
             border-radius: 0.5rem;
             outline: none;
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: 0.2s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        textarea:focus {
             border-color: var(--blue);
         }
 
@@ -108,7 +106,6 @@
             display: block;
         }
 
-        /* Custom Radio Buttons for Payment */
         .payment-options {
             display: flex;
             flex-wrap: wrap;
@@ -126,18 +123,12 @@
             border: 1px solid var(--border);
             border-radius: 0.5rem;
             cursor: pointer;
-            color: #4b5563;
             font-weight: 600;
             font-size: 0.9rem;
             transition: 0.2s;
             user-select: none;
         }
 
-        .payment-options label:hover {
-            background-color: var(--bg-color);
-        }
-
-        /* Active Radio States */
         .payment-options input[type="radio"]:checked+label {
             background-color: #eff6ff;
             border-color: var(--blue);
@@ -150,7 +141,6 @@
             color: white;
         }
 
-        /* Submit Button */
         .btn-submit {
             background-color: var(--green);
             color: white;
@@ -177,72 +167,58 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
-
-        .cancel-link:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 
 <body>
-
-    <nav class="navbar">
-        <a class="logo" href="/">ATOMIC</a>
-    </nav>
+    <nav class="navbar"><a class="logo" href="/">ATOMIC</a></nav>
 
     <div class="checkout-container">
         <div class="card">
-            <h3>Secure Checkout 🔒</h3>
-
-            <form action="/pay/{{ product_id }}" method="POST">
-
+            <h3>Cart Checkout 🔒</h3>
+            <form action="/pay_cart" method="POST">
                 <div class="form-group">
-                    <label for="name">Full Name</label>
+                    <label>Full Name</label>
                     <input type="text" id="name" name="name" required placeholder="John Doe">
                 </div>
-
                 <div class="form-group">
-                    <label for="address">Shipping Address</label>
+                    <label>Shipping Address</label>
                     <input type="text" id="address" name="address" required placeholder="123 Developer Lane">
                 </div>
 
-                <hr>
+                <!-- NEW: Order Note / Comment -->
+                <div class="form-group">
+                    <label>Order Note (Optional)</label>
+                    <textarea name="order_note" rows="3"
+                        placeholder="e.g. Please deliver in the afternoon..."></textarea>
+                </div>
 
+                <hr>
                 <div class="form-group">
                     <label>Select Payment Method</label>
                     <div class="payment-options">
-                        <input type="radio" name="payment_method" id="kbz" value="kbz" onchange="updatePaymentInput()"
+                        <input type="radio" name="payment_method" id="cod" value="cod" onchange="updatePaymentInput()"
                             checked>
+                        <label for="cod">Cash on Delivery</label>
+                        <input type="radio" name="payment_method" id="kbz" value="kbz" onchange="updatePaymentInput()">
                         <label for="kbz">KBZ Pay</label>
-
                         <input type="radio" name="payment_method" id="wave" value="wave"
                             onchange="updatePaymentInput()">
                         <label for="wave">Wave Money</label>
-
-                        <input type="radio" name="payment_method" id="ayeya" value="ayeya"
-                            onchange="updatePaymentInput()">
-                        <label for="ayeya">Ayeya Pay</label>
-
-                        <input type="radio" name="payment_method" id="aplus" value="aplus"
-                            onchange="updatePaymentInput()">
-                        <label for="aplus">A+ Pay</label>
-
                         <input type="radio" name="payment_method" id="other" value="other"
                             onchange="updatePaymentInput()">
                         <label for="other">Credit Card</label>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label id="account-label" for="account_info">KBZ Pay Phone Number</label>
-                    <input type="text" id="account_info" name="account_info" required placeholder="09 XXXXXXXX"
-                        maxlength="15">
-                    <span id="account-help" class="help-text">Enter the phone number registered to your mobile
-                        wallet.</span>
+                <div class="form-group" id="account-group" style="display: none;">
+                    <label id="account-label" for="account_info">Account Number</label>
+                    <input type="text" id="account_info" name="account_info" placeholder="Enter details">
+                    <span id="account-help" class="help-text"></span>
                 </div>
 
-                <button type="submit" class="btn-submit">Complete Payment</button>
-                <a href="/" class="cancel-link">Cancel and return to shop</a>
+                <button type="submit" class="btn-submit">Confirm Order</button>
+                <a href="/cart" class="cancel-link">Back to Cart</a>
             </form>
         </div>
     </div>
@@ -250,23 +226,32 @@
     <script>
         function updatePaymentInput() {
             const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            const inputGroup = document.getElementById('account-group');
             const inputLabel = document.getElementById('account-label');
             const inputField = document.getElementById('account_info');
             const helpText = document.getElementById('account-help');
 
-            if (selectedMethod === 'other') {
-                inputLabel.innerText = "Credit Card Number";
-                inputField.placeholder = "XXXX XXXX XXXX XXXX";
-                inputField.maxLength = 19;
-                helpText.innerText = "Use 4242 4242 4242 4242 to test a successful payment.";
+            if (selectedMethod === 'cod') {
+                inputGroup.style.display = 'none';
+                inputField.removeAttribute('required');
             } else {
-                let methodName = document.querySelector(`label[for="${selectedMethod}"]`).innerText;
-                inputLabel.innerText = methodName + " Phone Number";
-                inputField.placeholder = "09 XXXXXXXX";
-                inputField.maxLength = 15;
-                helpText.innerText = "Enter the phone number registered to your mobile wallet.";
+                inputGroup.style.display = 'block';
+                inputField.setAttribute('required', 'true');
+                if (selectedMethod === 'other') {
+                    inputLabel.innerText = "Credit Card Number";
+                    inputField.placeholder = "XXXX XXXX XXXX XXXX";
+                    inputField.maxLength = 19;
+                    helpText.innerText = "Use 4242 4242 4242 4242 to test.";
+                } else {
+                    let methodName = document.querySelector(`label[for="${selectedMethod}"]`).innerText;
+                    inputLabel.innerText = methodName + " Phone Number";
+                    inputField.placeholder = "09 XXXXXXXX";
+                    inputField.maxLength = 15;
+                    helpText.innerText = "Enter the phone number registered to your mobile wallet.";
+                }
             }
         }
+        updatePaymentInput();
     </script>
 </body>
 

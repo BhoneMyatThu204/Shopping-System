@@ -43,7 +43,8 @@ def connect_db():
 import sqlite3
 
 def connect_db():
-    conn = sqlite3.connect("shopping.db")
+    # Database locked မဖြစ်စေရန် timeout=15.0 ထည့်သွင်းထားပါသည်
+    conn = sqlite3.connect("shopping.db", timeout=15.0)
     cursor = conn.cursor()
     
     cursor.execute('''
@@ -51,16 +52,44 @@ def connect_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             price REAL NOT NULL,
-            stock INTEGER NOT NULL
+            stock INTEGER NOT NULL,
+            image TEXT NOT NULL,
+            discount INTEGER DEFAULT 0
         )
     ''')
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
             product_id INTEGER,
             quantity INTEGER,
+            size TEXT,
             total_price REAL,
+            status TEXT DEFAULT 'Pending',
+            order_note TEXT,
+            rating INTEGER DEFAULT 0,
+            review_comment TEXT,
+            FOREIGN KEY(product_id) REFERENCES products(id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS cart (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            product_id INTEGER,
+            quantity INTEGER DEFAULT 1,
+            size TEXT,
             FOREIGN KEY(product_id) REFERENCES products(id)
         )
     ''')
